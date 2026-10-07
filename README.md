@@ -4,7 +4,7 @@ A 50-state tabletop slingshot puzzle. States pop into a wooden slingshot one at 
 
 Five levels, from full-shape-with-hints down to capitals-only. Mobile-friendly tap/drag controls.
 
-**Play:** https://pete1450.github.io/Fling-the-State/ (enable Pages: Settings → Pages → Deploy from branch → main / root)
+**Play:** https://pete1450.github.io/Fling-the-State/ 
 
 ## Building
 
