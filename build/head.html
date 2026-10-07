@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Fling the State</title>
+<style>
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#dfeef7;
+    font-family: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+    -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color: transparent; }
+  #c { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; }
+  #hud { position:fixed; inset:0; pointer-events:none; z-index:5; }
+  #topbar { position:absolute; top:0; left:0; right:0; display:flex; align-items:flex-start;
+    justify-content:space-between; padding:12px 14px; }
+  #title { font-size:20px; font-weight:800; color:#5b3a1e; letter-spacing:1px;
+    text-shadow:0 1px 0 rgba(255,255,255,.6); }
+  #title small { display:block; font-size:11px; font-weight:600; color:#8a6a45; letter-spacing:2px; }
+  #statename { text-align:center; }
+  #statename .name { font-size:30px; font-weight:900; color:#4a2f14; letter-spacing:2px;
+    text-shadow:0 2px 0 rgba(255,255,255,.65); }
+  #statename .sub { font-size:12px; font-weight:700; color:#8a6a45; letter-spacing:1px; }
+  #stats { text-align:right; font-size:14px; font-weight:700; color:#5b3a1e; line-height:1.5;
+    text-shadow:0 1px 0 rgba(255,255,255,.6); }
+  #btns { position:absolute; top:86px; right:14px; display:flex; gap:8px; pointer-events:auto; }
+  .hbtn { width:42px; height:42px; border-radius:50%; border:2px solid #8a6a45; background:#fff8e8;
+    font-size:20px; cursor:pointer; color:#5b3a1e; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  .hbtn:active { transform:scale(.92); }
+  #lvlBadge { display:inline-block; margin-top:4px; font-size:12px; font-weight:800; color:#fff;
+    background:#b07a2e; border-radius:8px; padding:2px 10px; letter-spacing:1px; }
+  #lvlbtns { display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .lvlbtn { display:flex; align-items:center; gap:12px; text-align:left; background:#fff;
+    border:2px solid #c9a86a; border-radius:12px; padding:10px 14px; cursor:pointer; }
+  .lvlbtn:active { transform:scale(.97); background:#fdf3dd; }
+  .lvlbtn .n { font-size:15px; font-weight:900; color:#4a2f14; white-space:nowrap; }
+  .lvlbtn .d { font-size:13px; color:#6b4d2a; line-height:1.35; }
+  #hint { position:absolute; bottom:14px; left:0; right:0; text-align:center; font-size:14px;
+    font-weight:600; color:#6b4d2a; text-shadow:0 1px 0 rgba(255,255,255,.7); }
+  #toast { position:absolute; top:34%; left:0; right:0; text-align:center; font-size:44px; font-weight:900;
+    color:#2f7a3d; text-shadow:0 2px 0 #fff, 0 4px 14px rgba(0,0,0,.25); opacity:0; transition:opacity .25s; }
+  .overlay { position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center;
+    background:rgba(60,40,18,.45); backdrop-filter: blur(3px); }
+  .card { background:#fff8e8; border:3px solid #8a6a45; border-radius:18px; padding:28px 34px;
+    max-width:420px; text-align:center; box-shadow:0 12px 40px rgba(0,0,0,.35); margin:16px; }
+  .card h1 { margin:0 0 6px; color:#4a2f14; font-size:34px; letter-spacing:1px; }
+  .card p { color:#6b4d2a; font-size:15px; line-height:1.55; margin:10px 0; }
+  .card .big { font-size:15px; }
+  .bigbtn { margin-top:14px; font-size:20px; font-weight:800; color:#fff; background:#4a8f3c;
+    border:none; border-radius:12px; padding:14px 44px; cursor:pointer; letter-spacing:1px;
+    box-shadow:0 4px 0 #356b2a; }
+  .bigbtn:active { transform:translateY(3px); box-shadow:0 1px 0 #356b2a; }
+  #winstats { font-size:17px; font-weight:700; color:#4a2f14; line-height:1.9; }
+  .hidden { display:none !important; }
+  kbd { background:#eee; border:1px solid #ccc; border-radius:4px; padding:0 5px; font-size:12px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div id="topbar">
+    <div id="title">FLING THE STATE<small>50-STATE TABLETOP</small><br><span id="lvlBadge">LEVEL 1</span></div>
+    <div id="statename"><div class="name" id="curName">—</div><div class="sub" id="curSub">GET READY</div></div>
+    <div id="stats"><span id="placed">0</span>/50 placed<br><span id="timer">0:00</span> · <span id="shots">0</span> shots</div>
+  </div>
+  <div id="btns">
+    <button class="hbtn" id="homeBtn" title="Recenter view">⌂</button>
+    <button class="hbtn" id="muteBtn" title="Sound on/off">🔊</button>
+    <button class="hbtn" id="restartBtn" title="Restart">⟳</button>
+  </div>
+  <div id="hint">Drag back on the slingshot, aim the dotted path, release!</div>
+  <div id="toast"></div>
+</div>
+<div class="overlay" id="startOverlay">
+  <div class="card">
+    <h1>🎯 Fling the State</h1>
+    <p class="big">A state pops into the slingshot. <b>Drag it back</b> — the dotted path shows exactly where it will land.</p>
+    <p>Fling it into its <b>correct home</b> on the map and it <b>sticks</b>. Miss, and you try again.</p>
+    <p style="margin-bottom:2px"><b>Drag anywhere else to pan the map.</b> Pick your challenge:</p>
+    <div id="lvlbtns">
+      <button class="lvlbtn" data-lvl="1"><span class="n">LEVEL 1</span><span class="d">Way too much hinting — the landing ring turns <b style="color:#2f7a3d">green</b> when your aim is right.</span></button>
+      <button class="lvlbtn" data-lvl="2"><span class="n">LEVEL 2</span><span class="d">No green ring. The state slot under your aim <b>glows</b> — you decide if it's the right one.</span></button>
+      <button class="lvlbtn" data-lvl="3"><span class="n">LEVEL 3</span><span class="d">No shape — just the state name on a token.</span></button>
+      <button class="lvlbtn" data-lvl="4"><span class="n">LEVEL 4</span><span class="d">Name only in the slingshot — nothing to see but the name.</span></button>
+      <button class="lvlbtn" data-lvl="5"><span class="n">LEVEL 5</span><span class="d">Capitals! Fling each capital city to its home state.</span></button>
+    </div>
+  </div>
+</div>
+<div class="overlay hidden" id="winOverlay">
+  <div class="card">
+    <h1>🇺🇸 You did it!</h1>
+    <p id="winSub">All 50 states are home.</p>
+    <div id="winstats"></div>
+    <button class="bigbtn" id="againBtn">PLAY AGAIN</button><br>
+    <button class="bigbtn hidden" id="nextLvlBtn" style="background:#b07a2e;box-shadow:0 4px 0 #7c5228;margin-top:10px;">NEXT LEVEL →</button>
+  </div>
+</div>
+<script>
