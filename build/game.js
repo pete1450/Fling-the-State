@@ -7,7 +7,7 @@ if (typeof THREE === 'undefined' || typeof STATES === 'undefined') {
 }
 
 // ---------- constants ----------
-const POUCH = { x: 0, y: SS.LAUNCH_Y, z: 16.9 };   // pouch rest (piece launch height)
+const POUCH = { x: 0, y: SS.LAUNCH_Y, z: 10.3 };   // pouch rest (piece launch height)
 const TABLE = { hx: 32, hz: 23 };                   // table half extents
 const LOOK = new THREE.Vector3(0, 0, 2);
 const OFF = new THREE.Vector3(0, 30, 36);
@@ -70,7 +70,7 @@ scene.fog = new THREE.Fog(0xdfeef7, 80, 160);
 
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
 // pannable view: camera looks at viewTarget; drags move it around
-const VIEW_HOME = new THREE.Vector3(0, 3, 4);
+const VIEW_HOME = new THREE.Vector3(0, 3, 1);
 const viewTarget = VIEW_HOME.clone();
 const VIEW_B = { x0: -24, x1: 24, z0: -14, z1: 16 };
 const OFF_NORM = OFF.clone().normalize();
@@ -196,14 +196,14 @@ function slotAt(x, z) {
 
 // ---------- slingshot ----------
 const sling = new THREE.Group(); scene.add(sling);
-const PRONG_TIP_L = new THREE.Vector3(-1.35, 4.1, 17.6);
-const PRONG_TIP_R = new THREE.Vector3(1.35, 4.1, 17.6);
+const PRONG_TIP_L = new THREE.Vector3(-1.35, 4.1, 11.0);
+const PRONG_TIP_R = new THREE.Vector3(1.35, 4.1, 11.0);
 {
   const wood = new THREE.MeshStandardMaterial({ color: 0x7a4a22, roughness: 0.7 });
   const base = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.7, 1.8), wood);
-  base.position.set(0, 0.35, 17.6); base.castShadow = true; sling.add(base);
+  base.position.set(0, 0.35, 11.0); base.castShadow = true; sling.add(base);
   const mkProng = (x0, x1) => {
-    const a = new THREE.Vector3(x0, 0.7, 17.6), b = new THREE.Vector3(x1, 4.1, 17.6);
+    const a = new THREE.Vector3(x0, 0.7, 11.0), b = new THREE.Vector3(x1, 4.1, 11.0);
     const len = a.distanceTo(b);
     const m = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.34, len, 10), wood);
     m.position.copy(a).lerp(b, 0.5);
