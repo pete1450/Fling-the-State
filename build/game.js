@@ -285,13 +285,13 @@ function buildPiece(si) {
   applyPieceLook(grp);
   return grp;
 }
-// what the slingshot shows per level: L1-2 full shape, L3 name on token,
-// L4 name only, L5 capital on token
+// what the slingshot shows per level: L1-2 full shape, L3 state name on token,
+// L4 capital name on token
 function applyPieceLook(grp) {
   const lvl = G.level;
   grp.traverse(o => {
     if (o.userData.isStateMesh) o.visible = lvl <= 2;
-    if (o.userData.isToken) o.visible = lvl === 3 || lvl === 5;
+    if (o.userData.isToken) o.visible = lvl === 3 || lvl === 4;
   });
 }
 // reveal the real state shape when it sticks (names never show on placed pieces)
@@ -372,10 +372,9 @@ const LEVELS = [null,
   { badge: 'LEVEL 1', winSub: 'All 50 states are home.' },
   { badge: 'LEVEL 2', winSub: 'All 50 states are home.' },
   { badge: 'LEVEL 3', winSub: 'All 50 states are home.' },
-  { badge: 'LEVEL 4', winSub: 'All 50 states are home.' },
-  { badge: 'LEVEL 5', winSub: 'All 50 capitals are home.' },
+  { badge: 'LEVEL 4', winSub: 'All 50 capitals are home.' },
 ];
-function displayName(si) { return G.level === 5 ? STATES[si].capital : STATES[si].name; }
+function displayName(si) { return G.level === 4 ? STATES[si].capital : STATES[si].name; }
 const placedMeshes = [];
 
 function spawnPiece() {
@@ -390,7 +389,7 @@ function spawnPiece() {
   if (isNew) { G.misses = 0; G.hintShown = false; hintRing.material.opacity = 0; }
   setHoverSlot(-1);
   hudName.textContent = displayName(G.si).toUpperCase();
-  hudSub.textContent = G.level === 5 ? 'FLING THE CAPITAL HOME' : 'DRAG THE SLINGSHOT BACK';
+  hudSub.textContent = G.level === 4 ? 'FLING THE CAPITAL HOME' : 'DRAG THE SLINGSHOT BACK';
   hudShots.textContent = G.shots;
   G.phase = 'aim';
   AudioSys.pop();
@@ -432,7 +431,7 @@ function win() {
   el('winSub').textContent = LEVELS[G.level].winSub;
   el('winstats').innerHTML =
     '⏱ ' + fmtTime(G.time) + '<br>🎯 ' + G.shots + ' shots &nbsp;·&nbsp; ' + acc + '% first-try';
-  el('nextLvlBtn').classList.toggle('hidden', G.level >= 5);
+  el('nextLvlBtn').classList.toggle('hidden', G.level >= 4);
   el('winOverlay').classList.remove('hidden');
   AudioSys.win();
   for (let i = 0; i < 5; i++)
@@ -730,7 +729,7 @@ document.querySelectorAll('.lvlbtn').forEach(b => b.addEventListener('click', ()
   AudioSys.ensure(); startGame(parseInt(b.dataset.lvl, 10));
 }));
 el('againBtn').addEventListener('click', () => { AudioSys.ensure(); startGame(G.level); });
-el('nextLvlBtn').addEventListener('click', () => { AudioSys.ensure(); startGame(Math.min(5, G.level + 1)); });
+el('nextLvlBtn').addEventListener('click', () => { AudioSys.ensure(); startGame(Math.min(4, G.level + 1)); });
 el('restartBtn').addEventListener('click', () => { AudioSys.ensure(); startGame(G.level); });
 el('homeBtn').addEventListener('click', () => { viewTarget.copy(VIEW_HOME); applyView(); });
 el('muteBtn').addEventListener('click', function () {
