@@ -308,11 +308,11 @@ function revealPieceShape(grp) {
 const TRAIL_N = 42;
 const trailGeo = new THREE.BufferGeometry();
 trailGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(TRAIL_N * 3), 3));
-const trailMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, sizeAttenuation: true, transparent: true, opacity: 0.95, depthWrite: false });
+const trailMat = new THREE.PointsMaterial({ color: 0x111111, size: 0.5, sizeAttenuation: true, transparent: true, opacity: 0.95, depthWrite: false });
 const trail = new THREE.Points(trailGeo, trailMat);
 trail.visible = false; trail.frustumCulled = false; scene.add(trail);
 const ringGeo = new THREE.RingGeometry(0.55, 0.85, 40); ringGeo.rotateX(-Math.PI / 2);
-const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false });
+const ringMat = new THREE.MeshBasicMaterial({ color: 0x111111, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false });
 const landRing = new THREE.Mesh(ringGeo, ringMat);
 landRing.position.y = 0.12; landRing.visible = false; scene.add(landRing);
 const hintRing = new THREE.Mesh(ringGeo.clone(), new THREE.MeshBasicMaterial({ color: 0xf5a623, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false }));
@@ -550,7 +550,7 @@ function updatePreview() {
   const local = worldToMap(land.x, land.y, land.z);
   const onBoard = onMapBoard(local.x, local.z);
   trail.visible = true;
-  trailMat.color.setHex(onBoard ? 0xffffff : 0xff9040);
+  trailMat.color.setHex(onBoard ? 0x111111 : 0xff9040);
   if (onBoard) {
     landRing.visible = true;
     landRing.position.set(land.x, land.y, land.z).addScaledVector(SURF_N, 0.07);
@@ -559,7 +559,7 @@ function updatePreview() {
     // L2+: ring stays white; the slot under the landing point glows instead.
     // Stick rule: the hovered (highlighted) polygon must be the target.
     const ok = slotAt(local.x, local.z) === G.si;
-    ringMat.color.setHex(G.level === 1 && ok ? 0x35c759 : 0xffffff);
+    ringMat.color.setHex(G.level === 1 && ok ? 0x35c759 : 0x111111);
     setHoverSlot(slotAt(local.x, local.z));
   } else { landRing.visible = false; setHoverSlot(-1); }
 }
@@ -731,7 +731,20 @@ document.querySelectorAll('.lvlbtn').forEach(b => b.addEventListener('click', ()
 }));
 el('againBtn').addEventListener('click', () => { AudioSys.ensure(); startGame(G.level); });
 el('nextLvlBtn').addEventListener('click', () => { AudioSys.ensure(); startGame(Math.min(4, G.level + 1)); });
-el('restartBtn').addEventListener('click', () => { AudioSys.ensure(); startGame(G.level); });
+el('restartBtn').addEventListener('click', () => {
+  // back to the level menu: clear the board, show the picker
+  G.runId++;
+  for (const m of placedMeshes) { m.traverse(o => { if (o.isMesh || o.isSprite) o.material.dispose(); }); scene.remove(m); }
+  placedMeshes.length = 0;
+  clearPiece();
+  G.fly = null; G.anim = null; G.slingId = null; panId = null;
+  setHoverSlot(-1);
+  hintRing.material.opacity = 0; G.hintShown = false;
+  trail.visible = false; landRing.visible = false;
+  G.timeRunning = false;
+  el('winOverlay').classList.add('hidden');
+  el('startOverlay').classList.remove('hidden');
+});
 el('homeBtn').addEventListener('click', () => { viewTarget.copy(VIEW_HOME); applyView(); });
 el('muteBtn').addEventListener('click', function () {
   AudioSys.ensure(); AudioSys.muted = !AudioSys.muted;
