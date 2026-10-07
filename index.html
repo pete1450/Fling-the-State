@@ -605,6 +605,7 @@ function buildPiece(si) {
     m.userData.isStateMesh = true; grp.add(m);
   }
   const token = new THREE.Mesh(tokenGeo, tokenMat);
+  token.position.y = 0.6; // sit clear of the pouch during the idle bob
   token.castShadow = true; token.userData.isToken = true; grp.add(token);
   const label = displayName(si);
   if (!tagCache[label]) tagCache[label] = makeTagTexture(label);
